@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Japan N5 Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --teal:#3d9e8c;
+  --teal-d:#2e7d6e;
+  --teal-l:#a8d8d1;
+  --teal-bg:#dff0ed;
+  --white:#ffffff;
+  --black:#111;
+  --mid:#555;
+  --ok:#27ae60;
+  --err:#e74c3c;
+}
+html,body{height:100%;background:#fff;font-family:'Nunito',sans-serif;overflow-x:hidden}
+
+/* APP SHELL */
+.app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:#fff;position:relative}
+
+/* ── HEADER ── */
+.hdr{position:relative;text-align:center;padding:22px 20px 0;background:#fff;overflow:hidden}
+.hdr-blob{position:absolute;top:-70px;width:170px;height:170px;background:var(--teal-bg);border-radius:50%;z-index:0}
+.hdr-blob.left{left:-50px}
+.hdr-blob.right{right:-50px}
+.hdr-title{font-family:'Nunito',sans-serif;font-size:34px;font-weight:900;letter-spacing:4px;color:var(--black);position:relative;z-index:1}
+.hdr-sub{font-size:11px;font-weight:800;letter-spacing:7px;color:var(--mid);margin-top:2px;position:relative;z-index:1}
+.hdr-line{height:2px;background:var(--black);margin-top:16px}
+
+/* PROGRESS */
+.prog-bar{height:4px;background:var(--teal-bg);margin:0}
+.prog-fill{height:100%;background:var(--teal);transition:width .5s ease;width:0%}
+
+/* STATS */
+.stats{display:none;padding:12px 16px 0;gap:8px}
+.stats.on{display:flex}
+.stat{flex:1;background:var(--teal);border-radius:14px;padding:10px 4px;text-align:center;color:#fff}
+.stat-lbl{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;opacity:.85}
+.stat-val{font-size:26px;font-weight:900;line-height:1.1}
+
+/* CONTENT */
+.body{flex:1;padding:20px 16px 36px;display:flex;flex-direction:column;gap:14px}
+
+/* SCREENS */
+.scr{display:none;flex-direction:column;gap:14px;animation:up .3s ease}
+.scr.on{display:flex}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── START ── */
+.welcome{font-family:'Noto Sans JP',sans-serif;font-size:38px;font-weight:900;color:var(--teal);text-align:center}
+.info-box{background:var(--teal);border-radius:20px;padding:28px 22px;color:#fff}
+.info-box p{font-size:15px;font-weight:700;line-height:1.9;text-align:center}
+.info-box .eg{margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.3);font-size:13px;font-weight:700;line-height:1.7}
+
+/* ── MEMORIZE ── */
+.mem-lbl{font-size:10px;font-weight:800;letter-spacing:4px;text-transform:uppercase;color:var(--teal-d);text-align:center}
+.vc{background:var(--teal);border-radius:14px;padding:13px 16px;display:flex;align-items:center;gap:12px;color:#fff}
+.vc-num{font-size:11px;font-weight:800;opacity:.7;min-width:26px}
+.vc-jp{font-family:'Noto Sans JP',sans-serif;font-size:19px;font-weight:900;flex:1}
+.vc-rom{font-size:12px;font-weight:700;opacity:.85;min-width:90px}
+.vc-mean{font-size:12px;font-weight:900;text-align:right}
+
+/* ── QUIZ ── */
+.quiz-box{background:var(--teal);border-radius:22px;padding:40px 20px;text-align:center;color:#fff;position:relative;min-height:155px;display:flex;align-items:center;justify-content:center}
+.quiz-hint{position:absolute;top:14px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:800;letter-spacing:3px;text-transform:uppercase;opacity:.7;white-space:nowrap}
+.quiz-word{font-family:'Noto Sans JP',sans-serif;font-size:60px;font-weight:900;letter-spacing:4px}
+
+.ans-lbl{font-size:10px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--mid);text-align:center}
+.ans-hint{font-size:11px;font-weight:700;color:#aaa;text-align:center;margin-top:-6px}
+.inp-row{display:flex;gap:8px}
+input[type=text]{flex:1;background:var(--teal-bg);border:2px solid transparent;border-radius:13px;padding:13px 15px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;color:var(--black);outline:none;transition:.2s}
+input[type=text]::placeholder{color:#aaa}
+input[type=text]:focus{border-color:var(--teal);background:#fff}
+input.ok{border-color:var(--ok);background:#edfaf4}
+input.no{border-color:var(--err);background:#fdf1f0}
+
+/* FEEDBACK */
+.fb{border-radius:14px;padding:16px 18px;display:none;font-size:13px;font-weight:700;line-height:1.7}
+.fb.on{display:block;animation:up .2s ease}
+.fb.ok{background:#edfaf4;border:2px solid var(--ok)}
+.fb.no{background:#fdf1f0;border:2px solid var(--err)}
+.fb-ttl{font-size:14px;font-weight:900;margin-bottom:5px}
+.fb-ttl.ok{color:var(--ok)}
+.fb-ttl.no{color:var(--err)}
+
+/* BUTTONS */
+.btn{border:none;border-radius:14px;font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;padding:15px 20px;transition:.12s}
+.btn:active{transform:scale(.97)}
+.btn-teal{background:var(--teal);color:#fff;box-shadow:0 5px 18px rgba(61,158,140,.25)}
+.btn-teal:hover{background:var(--teal-d)}
+.btn-dark{background:var(--black);color:#fff}
+.btn-outline{background:#fff;color:var(--teal);border:2px solid var(--teal)}
+.btn-sm{padding:11px 15px;font-size:13px;border-radius:11px}
+.btn-row{display:flex;gap:10px}
+.btn-row .btn{flex:1}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chip{background:var(--teal-bg);border-radius:20px;padding:6px 14px;font-size:11px;font-weight:800;color:var(--teal-d)}
+.chip span{color:var(--teal)}
+
+/* ── END ── */
+.end-ttl{font-size:22px;font-weight:900;text-align:center}
+.end-sub{font-size:13px;font-weight:700;color:#aaa;text-align:center;margin-top:-8px}
+.score{font-size:82px;font-weight:900;color:var(--teal);text-align:center;line-height:1}
+.score-lbl{font-size:14px;font-weight:700;color:var(--mid);text-align:center;margin-top:4px}
+.end-box{background:var(--teal-bg);border-radius:16px;padding:18px 18px}
+.end-box-ttl{font-size:10px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--teal-d);margin-bottom:12px}
+.mk-row{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--teal-l);gap:10px}
+.mk-row:last-child{border-bottom:none}
+.mk-jp{font-family:'Noto Sans JP',sans-serif;font-size:18px;font-weight:900}
+.mk-info{text-align:right;font-size:11px;font-weight:700}
+.mk-yours{color:var(--err)}
+.mk-right{color:var(--ok)}
+.m-chips{display:flex;flex-wrap:wrap;gap:8px}
+.m-chip{background:var(--teal);color:#fff;border-radius:20px;padding:5px 13px;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-blob left"></div>
+    <div class="hdr-blob right"></div>
+    <div class="hdr-title">JAPAN</div>
+    <div class="hdr-sub">N 5 &nbsp; L E V E L</div>
+    <div class="hdr-line"></div>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div class="prog-bar"><div class="prog-fill" id="pFill"></div></div>
+
+  <!-- STATS -->
+  <div class="stats" id="stats">
+    <div class="stat"><div class="stat-lbl">Soal</div><div class="stat-val" id="sTotal">0</div></div>
+    <div class="stat"><div class="stat-lbl">Benar</div><div class="stat-val" id="sCorrect">0</div></div>
+    <div class="stat"><div class="stat-lbl">Salah</div><div class="stat-val" id="sWrong">0</div></div>
+    <div class="stat"><div class="stat-lbl">Hafal</div><div class="stat-val" id="sMastered">0</div></div>
+  </div>
+
+  <div class="body">
+
+    <!-- START -->
+    <div class="scr on" id="sStart">
+      <div class="welcome">ようこそ！</div>
+      <div class="info-box">
+        <p>Game hafalan kosakata Jepang.<br>Kamu akan diberi <strong>5 kosakata</strong> untuk dihafal,<br><br>lalu diuji dengan soal acak.</p>
+        <div class="eg">Jawab dengan format: <strong>romaji (arti)</strong><br>Contoh: <strong>watashi (aku)</strong></div>
+      </div>
+      <button class="btn btn-teal" onclick="startGame()">START GAME</button>
+    </div>
+
+    <!-- MEMORIZE -->
+    <div class="scr" id="sMem">
+      <div class="mem-lbl" id="memLbl">Hafal kosakata ini</div>
+      <div id="vcList"></div>
+      <button class="btn btn-teal" style="margin-top:4px" onclick="startQuiz()">GO</button>
+    </div>
+
+    <!-- QUIZ -->
+    <div class="scr" id="sQuiz">
+      <div class="quiz-box">
+        <div class="quiz-hint">Tulis romaji + arti</div>
+        <div class="quiz-word" id="qWord"></div>
+      </div>
+      <div class="ans-lbl">Jawabanmu</div>
+      <div class="ans-hint">Format: romaji (arti) · contoh: watashi (aku)</div>
+      <div class="inp-row">
+        <input type="text" id="ansInp" placeholder="Ketik jawabanmu..." onkeydown="onKey(event)">
+        <button class="btn btn-teal btn-sm" onclick="check()">CHECK</button>
+      </div>
+      <div class="fb" id="fb"></div>
+      <div class="btn-row">
+        <button class="btn btn-teal" onclick="next()">UP</button>
+        <button class="btn btn-dark" onclick="endGame()">END GAME</button>
+      </div>
+      <div class="chips">
+        <div class="chip">Enter · <span>CHECK</span></div>
+        <div class="chip">Klik <span>UP</span> · soal berikutnya</div>
+        <div class="chip">Klik <span>END</span> akhiri game</div>
+      </div>
+    </div>
+
+    <!-- END -->
+    <div class="scr" id="sEnd">
+      <div class="end-ttl">Hasil</div>
+      <div class="end-sub">Session selesai!</div>
+      <div class="score" id="eScore">0%</div>
+      <div class="score-lbl" id="eLbl">0 benar dari 0 soal</div>
+      <div class="end-box" id="eMistBox" style="display:none">
+        <div class="end-box-ttl">❌ Kesalahan</div>
+        <div id="eMistList"></div>
+      </div>
+      <div class="end-box">
+        <div class="end-box-ttl">✅ Kosakata yang sudah kamu hafal</div>
+        <div class="m-chips" id="eMastered"></div>
+      </div>
+      <button class="btn btn-teal" onclick="startGame()">START LAGI (+2 KATA BARU)</button>
+      <button class="btn btn-outline" onclick="resetAll()">RESET TOTAL</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const V=[
+  {n:1,jp:"せかい",r:"sekai",m:"DUNIA"},{n:2,jp:"アジア",r:"ajia",m:"ASIA"},{n:3,jp:"ヨーロッパ",r:"yoroppa",m:"EROPA"},{n:4,jp:"アフリカ",r:"afurika",m:"AFRIKA"},{n:5,jp:"にほん",r:"nihon",m:"JEPANG"},
+  {n:6,jp:"インドネシア",r:"indoneshia",m:"INDONESIA"},{n:7,jp:"ちゅうごく",r:"chuugoku",m:"CHINA"},{n:8,jp:"かんこく",r:"kankoku",m:"KORSEL"},{n:9,jp:"マレーシア",r:"mareeshia",m:"MALAYSIA"},{n:10,jp:"タイ",r:"tai",m:"THAILAND"},
+  {n:11,jp:"フィリピン",r:"firipin",m:"FILIPINA"},{n:12,jp:"ベトナム",r:"betonamu",m:"VIETNAM"},{n:13,jp:"シンガポール",r:"singapooru",m:"SINGAPURA"},{n:14,jp:"ブルネイ",r:"burunei",m:"BRUNEI"},{n:15,jp:"ホンコン",r:"honkon",m:"HONGKONG"},
+  {n:16,jp:"インド",r:"indo",m:"INDIA"},{n:17,jp:"サウジアラビア",r:"saujiarabia",m:"SAUDI ARABIA"},{n:18,jp:"オーストラリア",r:"oosutoraria",m:"AUSTRALIA"},{n:19,jp:"イギリス",r:"igirisu",m:"INGGRIS"},{n:20,jp:"ドイツ",r:"doitsu",m:"JERMAN"},
+  {n:21,jp:"フランス",r:"furansu",m:"PERANCIS"},{n:22,jp:"イタリア",r:"itaria",m:"ITALIA"},{n:23,jp:"オランダ",r:"oranda",m:"BELANDA"},{n:24,jp:"スペイン",r:"supein",m:"SPANYOL"},{n:25,jp:"ロシア",r:"roshia",m:"RUSIA"},
+  {n:26,jp:"アメリカ",r:"amerika",m:"AMERIKA"},{n:27,jp:"カナダ",r:"kanada",m:"KANADA"},{n:28,jp:"ほん",r:"hon",m:"BUKU"},{n:29,jp:"じしょ",r:"jisho",m:"KAMUS"},{n:30,jp:"しんぶん",r:"shinbun",m:"KORAN"},
+  {n:31,jp:"ざっし",r:"zasshi",m:"MAJALAH"},{n:32,jp:"はこ",r:"hako",m:"KOTAK"},{n:33,jp:"かばん",r:"kaban",m:"TAS"},{n:34,jp:"かぎ",r:"kagi",m:"KUNCI"},{n:35,jp:"えんぴつ",r:"enpitsu",m:"PENSIL"},
+  {n:36,jp:"ボールペン",r:"boorupen",m:"BOLPEN"},{n:37,jp:"ペン",r:"pen",m:"PENA"},{n:38,jp:"ノート",r:"nooto",m:"BUKU CATATAN"},{n:39,jp:"かみ",r:"kami",m:"KERTAS"},{n:40,jp:"たばこ",r:"tabako",m:"ROKOK"},
+  {n:41,jp:"マッチ",r:"macchi",m:"KOREK API"},{n:42,jp:"はいざら",r:"haizara",m:"ASBAK"},{n:43,jp:"ライター",r:"raitaa",m:"KOREK GAS"},{n:44,jp:"つくえ",r:"tsukue",m:"MEJA"},{n:45,jp:"いす",r:"isu",m:"KURSI"},
+  {n:46,jp:"まど",r:"mado",m:"JENDELA"},{n:47,jp:"でんき",r:"denki",m:"LAMPU LISTRIK"},{n:48,jp:"スイッチ",r:"suicchi",m:"SAKLAR"},{n:49,jp:"ドア",r:"doa",m:"PINTU"},{n:50,jp:"テレビ",r:"terebi",m:"TELEVISI"},
+  {n:51,jp:"ラジオ",r:"rajio",m:"RADIO"},{n:52,jp:"とけい",r:"tokei",m:"JAM"},{n:53,jp:"カメラ",r:"kamera",m:"KAMERA"},{n:54,jp:"じどうしゃ",r:"jidousha",m:"MOBIL"},{n:55,jp:"いえ",r:"ie",m:"RUMAH"},
+  {n:56,jp:"にわ",r:"niwa",m:"HALAMAN"},{n:57,jp:"かいしゃ",r:"kaisha",m:"PERUSAHAAN"},{n:58,jp:"じむしょ",r:"jimusho",m:"KANTOR"},{n:59,jp:"うけつけ",r:"uketsuke",m:"BAGIAN PENERIMA TAMU"},{n:60,jp:"ロビー",r:"robii",m:"LOBBY"},
+  {n:61,jp:"へや",r:"heya",m:"KAMAR"},{n:62,jp:"おてあらい",r:"otearai",m:"TOILET"},{n:63,jp:"きょうしつ",r:"kyoushitsu",m:"RUANG KELAS"},{n:64,jp:"しょくどう",r:"shokudou",m:"KANTIN"},{n:65,jp:"せんもん",r:"senmon",m:"JURUSAN/KEAHLIAN"},
+  {n:66,jp:"でんき",r:"denki",m:"LISTRIK"},{n:67,jp:"きかい",r:"kikai",m:"MESIN"},{n:68,jp:"コンピューター",r:"konpyuutaa",m:"KOMPUTER"},{n:69,jp:"あさ",r:"asa",m:"PAGI"},{n:70,jp:"ひる",r:"hiru",m:"SIANG"},
+  {n:71,jp:"ばん",r:"ban",m:"MALAM"},{n:72,jp:"ごぜん",r:"gozen",m:"AM"},{n:73,jp:"ごご",r:"gogo",m:"PM"},{n:74,jp:"えき",r:"eki",m:"STASIUN"},{n:75,jp:"こうじょう",r:"koujou",m:"PABRIK"},
+  {n:76,jp:"ぎんこう",r:"ginkou",m:"BANK"},{n:77,jp:"びょういん",r:"byouin",m:"RUMAH SAKIT"},{n:78,jp:"デパート",r:"depaato",m:"DEPARTEMEN STORE"},{n:79,jp:"ほんや",r:"honya",m:"TOKO BUKU"},{n:80,jp:"とこや",r:"tokoya",m:"TEMPAT PANGKAS RAMBUT"},
+  {n:81,jp:"たんじょうび",r:"tanjoubi",m:"HARI ULANG TAHUN"},{n:82,jp:"ひこうき",r:"hikouki",m:"PESAWAT TERBANG"},{n:83,jp:"しんかんせん",r:"shinkansen",m:"KERETA SUPER CEPAT"},{n:84,jp:"でんしゃ",r:"densha",m:"KERETA LISTRIK"},{n:85,jp:"ちかてつ",r:"chikatetsu",m:"KERETA BAWAH TANAH"},
+  {n:86,jp:"タクシー",r:"takushii",m:"TAKSI"},{n:87,jp:"バス",r:"basu",m:"BUS"},{n:88,jp:"じてんしゃ",r:"jitensha",m:"SEPEDA"},{n:89,jp:"あるいて",r:"aruite",m:"BERJALAN"},{n:90,jp:"ふね",r:"fune",m:"KAPAL LAUT"},
+  {n:91,jp:"ひとり（で）",r:"hitori de",m:"SENDIRI"},{n:92,jp:"ともだち（と）",r:"tomodachi to",m:"BERSAMA TEMAN"},{n:93,jp:"こいびと（と）",r:"koibito to",m:"BERSAMA PACAR"},{n:94,jp:"あさごはん",r:"asagohan",m:"MAKAN PAGI"},{n:95,jp:"ひるごはん",r:"hirugohan",m:"MAKAN SIANG"},
+  {n:96,jp:"ばんごはん",r:"bangohan",m:"MAKAN MALAM"},{n:97,jp:"たべもの",r:"tabemono",m:"MAKANAN"},{n:98,jp:"ごはん",r:"gohan",m:"NASI"},{n:99,jp:"パン",r:"pan",m:"ROTI"},{n:100,jp:"にく",r:"niku",m:"DAGING"},
+  {n:101,jp:"さかな",r:"sakana",m:"IKAN"},{n:102,jp:"たまご",r:"tamago",m:"TELUR"},{n:103,jp:"やさい",r:"yasai",m:"SAYURAN"},{n:104,jp:"くだもの",r:"kudamono",m:"BUAH-BUAHAN"},{n:105,jp:"りんご",r:"ringo",m:"APEL"},
+  {n:106,jp:"みかん",r:"mikan",m:"JERUK"},{n:107,jp:"バナナ",r:"banana",m:"PISANG"},{n:108,jp:"ぶどう",r:"budou",m:"ANGGUR"},{n:109,jp:"パイナップル",r:"painappuru",m:"NANAS"},{n:110,jp:"すいか",r:"suika",m:"SEMANGKA"},
+  {n:111,jp:"のみもの",r:"nomimono",m:"MINUMAN"},{n:112,jp:"コーヒー",r:"koohii",m:"KOPI"},{n:113,jp:"こうちゃ",r:"koucha",m:"TEH"},{n:114,jp:"おちゃ",r:"ocha",m:"TEH JEPANG"},{n:115,jp:"ぎゅうにゅう",r:"gyuunyuu",m:"SUSU SAPI"},
+  {n:116,jp:"ジュース",r:"juusu",m:"JUS"},{n:117,jp:"ビール",r:"biiru",m:"BIR"},{n:118,jp:"ウイスキー",r:"uisukii",m:"WISKY"},{n:119,jp:"おさけ",r:"osake",m:"SAKE"},{n:120,jp:"みず",r:"mizu",m:"AIR"},
+  {n:121,jp:"シャツ",r:"shatsu",m:"PAKAIAN"},{n:122,jp:"ネクタイ",r:"nekutai",m:"DASI"},{n:123,jp:"くつ",r:"kutsu",m:"SEPATU"},{n:124,jp:"くすり",r:"kusuri",m:"OBAT"},{n:125,jp:"はな",r:"hana",m:"BUNGA"},
+  {n:126,jp:"てがみ",r:"tegami",m:"SURAT"},{n:127,jp:"きって",r:"kitte",m:"PERANGKO"},{n:128,jp:"ふうとう",r:"fuutou",m:"AMPLOP"},{n:129,jp:"エアメール",r:"eameeru",m:"POS UDARA"},{n:130,jp:"はがき",r:"hagaki",m:"KARTU POS"},
+  {n:131,jp:"えはがき",r:"ehagaki",m:"KARTU POS BERGAMBAR"},{n:132,jp:"きっぷ",r:"kippu",m:"KARCIS"},{n:133,jp:"えいが",r:"eiga",m:"FILM"},{n:134,jp:"こうぎ",r:"kougi",m:"KULIAH"},{n:135,jp:"はし",r:"hashi",m:"SUMPIT"},
+  {n:136,jp:"スプーン",r:"supuun",m:"SENDOK"},{n:137,jp:"フォーク",r:"fooku",m:"GARPU"},{n:138,jp:"ナイフ",r:"naifu",m:"PISAU"},{n:139,jp:"ドライバー",r:"doraibaa",m:"OBENG"},{n:140,jp:"スパナ",r:"supana",m:"KUNCI PAS"},
+  {n:141,jp:"ペンチ",r:"penchi",m:"TANG"},{n:142,jp:"はさみ",r:"hasami",m:"GUNTING"},{n:143,jp:"ナイフ",r:"naifu",m:"PISAU (2)"},{n:144,jp:"かぞく",r:"kazoku",m:"KELUARGA"},{n:145,jp:"きょうだい",r:"kyoudai",m:"SAUDARA"},
+  {n:146,jp:"おとうさん",r:"otousan",m:"BAPAK"},{n:147,jp:"おかあさん",r:"okaasan",m:"IBU"},{n:148,jp:"おにいさん",r:"oniisan",m:"KAKAK LAKI-LAKI"},{n:149,jp:"おねえさん",r:"oneesan",m:"KAKAK PEREMPUAN"},{n:150,jp:"おとうとさん",r:"otoutosan",m:"ADIK LAKI-LAKI"},
+  {n:151,jp:"いもうとさん",r:"imoutosan",m:"ADIK PEREMPUAN"},{n:152,jp:"にもつ",r:"nimotsu",m:"BARANG"},{n:153,jp:"カタログ",r:"katarogu",m:"KATALOG"},{n:154,jp:"レポート",r:"repooto",m:"LAPORAN"},{n:155,jp:"おかね",r:"okane",m:"UANG"},
+  {n:156,jp:"やま",r:"yama",m:"GUNUNG"},{n:157,jp:"かわ",r:"kawa",m:"SUNGAI"},{n:158,jp:"まち",r:"machi",m:"KOTA"},{n:159,jp:"うみ",r:"umi",m:"LAUT"},{n:160,jp:"ぶたにく",r:"butaniku",m:"DAGING BABI"},
+  {n:161,jp:"とりにく",r:"toriniku",m:"DAGING AYAM"},{n:162,jp:"ぎゅうにく",r:"gyuuniku",m:"DAGING SAPI"},{n:163,jp:"りょうり",r:"ryouri",m:"MASAKAN"},{n:164,jp:"スポーツ",r:"supootsu",m:"OLAH RAGA"},{n:165,jp:"ピンポン",r:"pinpon",m:"PINGPONG"},
+  {n:166,jp:"テニス",r:"tenisu",m:"TENIS"},{n:167,jp:"サッカー",r:"sakkaa",m:"SEPAK BOLA"},{n:168,jp:"スキー",r:"sukii",m:"SKI"},{n:169,jp:"やきゅう",r:"yakyuu",m:"BISBOL"},{n:170,jp:"おんがく",r:"ongaku",m:"MUSIK"},
+  {n:171,jp:"うた",r:"uta",m:"LAGU"},{n:172,jp:"ギター",r:"gitaa",m:"GITAR"},{n:173,jp:"ダンス",r:"dansu",m:"DANSA"},{n:174,jp:"かんじ",r:"kanji",m:"KANJI"},{n:175,jp:"ひらがな",r:"hiragana",m:"HIRAGANA"},
+  {n:176,jp:"かたかな",r:"katakana",m:"KATAKANA"},{n:177,jp:"ローマじ",r:"roomaji",m:"ROMAWI"},{n:178,jp:"ゆうびんきょく",r:"yuubinkyoku",m:"KANTOR POS"},{n:179,jp:"ポスト",r:"posuto",m:"BIS SURAT"},{n:180,jp:"レストラン",r:"resutoran",m:"RESTORAN"},
+  {n:181,jp:"がっこう",r:"gakkou",m:"SEKOLAH"},{n:182,jp:"たいしかん",r:"taishikan",m:"KANTOR KEDUBES"},{n:183,jp:"パスポート",r:"pasupooto",m:"PASPORT"},{n:184,jp:"こうえん",r:"kouen",m:"TAMAN"},{n:185,jp:"ビル",r:"biru",m:"GEDUNG"},
+  {n:186,jp:"おとこのひと",r:"otoko no hito",m:"LAKI-LAKI"},{n:187,jp:"おんなのひと",r:"onna no hito",m:"PEREMPUAN"},{n:188,jp:"うえ",r:"ue",m:"ATAS"},{n:189,jp:"した",r:"shita",m:"BAWAH"},{n:190,jp:"まえ",r:"mae",m:"DEPAN"},
+  {n:191,jp:"うしろ",r:"ushiro",m:"BELAKANG"},{n:192,jp:"みぎ",r:"migi",m:"KANAN"},{n:193,jp:"ひだり",r:"hidari",m:"KIRI"},{n:194,jp:"なか",r:"naka",m:"DALAM"},{n:195,jp:"そと",r:"soto",m:"LUAR"},
+  {n:196,jp:"あいだ",r:"aida",m:"ANTARA"},{n:197,jp:"てんき",r:"tenki",m:"CUACA"},{n:198,jp:"はれ",r:"hare",m:"CERAH"},{n:199,jp:"くもり",r:"kumori",m:"MENDUNG"},{n:200,jp:"あめ",r:"ame",m:"HUJAN"},
+  {n:201,jp:"ゆき",r:"yuki",m:"SALJU"},{n:202,jp:"りょこう",r:"ryokou",m:"REKREASI/TAMASYA"},{n:203,jp:"おみやげ",r:"omiyage",m:"OLEH-OLEH"},{n:204,jp:"しごと",r:"shigoto",m:"PEKERJAAN"},{n:205,jp:"せんせい",r:"sensei",m:"GURU"},
+  {n:206,jp:"サラリーマン",r:"sarariiman",m:"KARYAWAN"},{n:207,jp:"おまわりさん",r:"omawarisan",m:"POLISI"},{n:208,jp:"おいしゃさん",r:"oishasan",m:"DOKTER"},{n:209,jp:"エンジニア",r:"enjinia",m:"AHLI MESIN"},{n:210,jp:"ラジカセ",r:"rajikase",m:"RADIO KASET"},
+  {n:211,jp:"しお",r:"shio",m:"GARAM"},{n:212,jp:"さとう",r:"satou",m:"GULA"},{n:213,jp:"しょうゆ",r:"shouyu",m:"KECAP ASIN"},{n:214,jp:"せっけん",r:"sekken",m:"SABUN"},{n:215,jp:"タオル",r:"taoru",m:"HANDUK"},
+  {n:216,jp:"はみがき",r:"hamigaki",m:"PASTA GIGI"},{n:217,jp:"はブラシ",r:"haburashi",m:"SIKAT GIGI"},{n:218,jp:"シャンプー",r:"shanpuu",m:"SAMPO"},{n:219,jp:"かさ",r:"kasa",m:"PAYUNG"},{n:220,jp:"ふく",r:"fuku",m:"PAKAIAN"},
+  {n:221,jp:"きもの",r:"kimono",m:"PAKAIAN KHAS JEPANG"},{n:222,jp:"かお",r:"kao",m:"WAJAH"},{n:223,jp:"かみ",r:"kami",m:"RAMBUT"},{n:224,jp:"め",r:"me",m:"MATA"},{n:225,jp:"みみ",r:"mimi",m:"TELINGA"},
+  {n:226,jp:"はな",r:"hana",m:"HIDUNG"},{n:227,jp:"くち",r:"kuchi",m:"MULUT"},{n:228,jp:"は",r:"ha",m:"GIGI"},{n:229,jp:"て",r:"te",m:"TANGAN"},{n:230,jp:"あし",r:"ashi",m:"KAKI"},
+  {n:231,jp:"でんきせいひん",r:"denki seihin",m:"PERALATAN LISTRIK"},{n:232,jp:"れいぞうこ",r:"reizouko",m:"LEMARI ES"},{n:233,jp:"すいはんき",r:"suihanki",m:"RICE COOKER"},{n:234,jp:"そうじき",r:"soujiki",m:"ALAT PENGHISAP DEBU"},{n:235,jp:"せんたくき",r:"sentakuki",m:"MESIN CUCI"},
+  {n:236,jp:"オーバー",r:"oobaa",m:"MANTEL"},{n:237,jp:"コート",r:"kooto",m:"JAS HUJAN"},{n:238,jp:"セーター",r:"seetaa",m:"SWEATER"},{n:239,jp:"ぼうし",r:"boushi",m:"TOPI"},{n:240,jp:"てぶくろ",r:"tebukuro",m:"SARUNG TANGAN"},
+  {n:241,jp:"マフラー",r:"mafuraa",m:"SYAL"},{n:242,jp:"こうさてん",r:"kousaten",m:"PEREMPATAN"},{n:243,jp:"しんごう",r:"shingou",m:"LAMPU MERAH"},{n:244,jp:"しゅみ",r:"shumi",m:"HOBBY"},
+  {n:245,jp:"おきます",r:"okimasu",m:"BANGUN"},{n:246,jp:"ねます",r:"nemasu",m:"TIDUR"},{n:247,jp:"はたらきます",r:"hatarakimasu",m:"BEKERJA"},{n:248,jp:"やすみます",r:"yasumimasu",m:"ISTIRAHAT"},{n:249,jp:"べんきょうします",r:"benkyou shimasu",m:"BELAJAR"},
+  {n:250,jp:"いきます",r:"ikimasu",m:"PERGI"},{n:251,jp:"きます",r:"kimasu",m:"DATANG"},{n:252,jp:"かえります",r:"kaerimasu",m:"PULANG"},{n:253,jp:"たべます",r:"tabemasu",m:"MAKAN"},{n:254,jp:"のみます",r:"nomimasu",m:"MINUM"},
+  {n:255,jp:"すいます",r:"suimasu",m:"MENGHISAP"},{n:256,jp:"よみます",r:"yomimasu",m:"MEMBACA"},{n:257,jp:"みます",r:"mimasu",m:"MELIHAT"},{n:258,jp:"ききます",r:"kikimasu",m:"MENDENGAR"},{n:259,jp:"かきます",r:"kakimasu",m:"MENULIS"},
+  {n:260,jp:"かいます",r:"kaimasu",m:"MEMBELI"},{n:261,jp:"とります",r:"torimasu",m:"MENGAMBIL"},{n:262,jp:"じっしゅうします",r:"jisshuu shimasu",m:"PRAKTEK"},{n:263,jp:"ピンポンします",r:"pinpon shimasu",m:"BERMAIN PINGPONG"},{n:264,jp:"はじめます",r:"hajimemasu",m:"MEMULAI"},
+  {n:265,jp:"おわります",r:"owarimasu",m:"SELESAI"},{n:266,jp:"かかります",r:"kakarimasu",m:"MEMERLUKAN WAKTU"},{n:267,jp:"きります",r:"kirimasu",m:"MEMOTONG"},{n:268,jp:"しゅうりします",r:"shuuri shimasu",m:"MEMPERBAIKI"},{n:269,jp:"あげます",r:"agemasu",m:"MEMBERI"},
+  {n:270,jp:"もらいます",r:"moraimasu",m:"MENERIMA"},{n:271,jp:"かします",r:"kashimasu",m:"MEMINJAMKAN"},{n:272,jp:"かります",r:"karimasu",m:"MEMINJAM"},{n:273,jp:"おしえます",r:"oshiemasu",m:"MENGAJARKAN"},{n:274,jp:"ならいます",r:"naraimasu",m:"BELAJAR (KPD GURU)"},
+  {n:275,jp:"おくります",r:"okurimasu",m:"MENGIRIM"},{n:276,jp:"つきます",r:"tsukimasu",m:"SAMPAI/TIBA"},{n:277,jp:"かけます",r:"kakemasu",m:"MENELPON"},{n:278,jp:"あいます",r:"aimasu",m:"BERTEMU"},{n:279,jp:"あります",r:"arimasu",m:"ADA (BENDA MATI)"},
+  {n:280,jp:"わかります",r:"wakarimasu",m:"MENGERTI"},{n:281,jp:"います",r:"imasu",m:"ADA (BENDA HIDUP)"},{n:282,jp:"せんたくします",r:"sentaku shimasu",m:"MENCUCI PAKAIAN"},{n:283,jp:"そうじします",r:"souji shimasu",m:"MEMBERSIHKAN"},{n:284,jp:"つくります",r:"tsukurimasu",m:"MEMBUAT"},
+  {n:285,jp:"だします",r:"dashimasu",m:"MENGIRIM SURAT"},{n:286,jp:"かえます",r:"kaemasu",m:"MENUKAR"},{n:287,jp:"あそびます",r:"asobimasu",m:"BERMAIN"},{n:288,jp:"さんぽします",r:"sanpo shimasu",m:"JALAN-JALAN"},{n:289,jp:"かいものします",r:"kaimono shimasu",m:"BERBELANJA"},
+  {n:290,jp:"けんぶつします",r:"kenbutsu shimasu",m:"MELANCONG"},{n:291,jp:"けんがくします",r:"kengaku shimasu",m:"MENINJAU"},{n:292,jp:"けっこんします",r:"kekkon shimasu",m:"MENIKAH"},{n:293,jp:"はいります",r:"hairimasu",m:"MASUK"},{n:294,jp:"でます",r:"demasu",m:"KELUAR"},
+  {n:295,jp:"はなします",r:"hanashimasu",m:"BERBICARA"},{n:296,jp:"いいます",r:"iimasu",m:"MENGATAKAN"},{n:297,jp:"まちます",r:"machimasu",m:"MENUNGGU"},{n:298,jp:"いそぎます",r:"isogimasu",m:"BURU-BURU"},{n:299,jp:"よびます",r:"yobimasu",m:"MEMANGGIL"},
+  {n:300,jp:"みせます",r:"misemasu",m:"MEMPERLIHATKAN"},{n:301,jp:"おしえます",r:"oshiemasu",m:"MEMBERITAHU"},{n:302,jp:"おぼえます",r:"oboemasu",m:"MENGINGAT"},{n:303,jp:"ふります",r:"furimasu",m:"TURUN HUJAN"},{n:304,jp:"とります",r:"torimasu",m:"MEMOTRET"},
+  {n:305,jp:"たちます",r:"tachimasu",m:"BERDIRI"},{n:306,jp:"すわります",r:"suwarimasu",m:"DUDUK"},{n:307,jp:"おきます",r:"okimasu",m:"MELETAKKAN"},{n:308,jp:"もちます",r:"mochimasu",m:"MEMBAWA"},{n:309,jp:"つけます",r:"tsukemasu",m:"MENYALAKAN"},
+  {n:310,jp:"けします",r:"keshimasu",m:"MEMADAMKAN"},{n:311,jp:"あけます",r:"akemasu",m:"MEMBUKA"},{n:312,jp:"しめます",r:"shimemasu",m:"MENUTUP"},{n:313,jp:"てつだいます",r:"tetsudaimasu",m:"MEMBANTU"},{n:314,jp:"つかいます",r:"tsukaimasu",m:"MENGGUNAKAN"},
+  {n:315,jp:"しります",r:"shirimasu",m:"TAHU/KENAL"},{n:316,jp:"すみます",r:"sumimasu",m:"TINGGAL"},{n:317,jp:"うります",r:"urimasu",m:"MENJUAL"},{n:318,jp:"きます",r:"kimasu",m:"MEMAKAI"},{n:319,jp:"かえします",r:"kaeshimasu",m:"MENGEMBALIKAN"},
+  {n:320,jp:"はらいます",r:"haraimasu",m:"MEMBAYAR"},{n:321,jp:"のります",r:"norimasu",m:"NAIK"},{n:322,jp:"おります",r:"orimasu",m:"TURUN"},{n:323,jp:"とまります",r:"tomarimasu",m:"BERHENTI"},{n:324,jp:"あるきます",r:"arukimasu",m:"BERJALAN"},
+  {n:325,jp:"いります",r:"irimasu",m:"PERLU"},{n:326,jp:"こまります",r:"komarimasu",m:"SUSAH/BINGUNG"},{n:327,jp:"なくします",r:"nakushimasu",m:"MENGHILANGKAN"},{n:328,jp:"ぬぎます",r:"nugimasu",m:"MELEPAS"},{n:329,jp:"さわります",r:"sawarimasu",m:"MENYENTUH"},
+  {n:330,jp:"わらいます",r:"waraimasu",m:"TERTAWA"},{n:331,jp:"わすれます",r:"wasuremasu",m:"LUPA"},{n:332,jp:"いれます",r:"iremasu",m:"MEMASUKKAN"},{n:333,jp:"とめます",r:"tomemasu",m:"MENGHENTIKAN"},{n:334,jp:"しんぱいします",r:"shinpai shimasu",m:"KHAWATIR"},
+  {n:335,jp:"なおります",r:"naorimasu",m:"SEMBUH"},{n:336,jp:"なおします",r:"naoshimasu",m:"MEMPERBAIKI"},{n:337,jp:"ひきます",r:"hikimasu",m:"BERMAIN PIANO"},{n:338,jp:"うたいます",r:"utaimasu",m:"MENYANYI"},{n:339,jp:"およぎます",r:"oyogimasu",m:"BERENANG"},
+  {n:340,jp:"うんてんします",r:"unten shimasu",m:"MENYETIR"},{n:341,jp:"あらいます",r:"araimasu",m:"MENCUCI"},{n:342,jp:"あびます",r:"abimasu",m:"MANDI"},{n:343,jp:"でかけます",r:"dekakemasu",m:"MENINGGALKAN RUMAH"},{n:344,jp:"ノックします",r:"nokku shimasu",m:"MENGETUK PINTU"},
+  {n:345,jp:"こしょうします",r:"koshou shimasu",m:"RUSAK"},{n:346,jp:"ききます",r:"kikimasu",m:"BERTANYA"},{n:347,jp:"とまります",r:"tomarimasu",m:"MENGINAP"},{n:348,jp:"やめます",r:"yamemasu",m:"BERHENTI (KERJA)"},{n:349,jp:"おもいます",r:"omoimasu",m:"MENGIRA"},
+  {n:350,jp:"わたります",r:"watarimasu",m:"MENYEBRANG"},{n:351,jp:"まがります",r:"magarimasu",m:"BELOK"},{n:352,jp:"ちゅういします",r:"chuui shimasu",m:"MEMPERHATIKAN"},{n:353,jp:"のりかえます",r:"norikaemasu",m:"GANTI KENDARAAN"},{n:354,jp:"うまれます",r:"umaremasu",m:"LAHIR"},
+  {n:355,jp:"しつもんします",r:"shitsumon shimasu",m:"BERTANYA (FORMAL)"},{n:356,jp:"かきます",r:"kakimasu",m:"MENGGAMBAR"},{n:357,jp:"くみたてます",r:"kumitatemasu",m:"MERAKIT"},{n:358,jp:"ぶんかいします",r:"bunkai shimasu",m:"MEMBONGKAR"},{n:359,jp:"せつめいします",r:"setsumei shimasu",m:"MENJELASKAN"},
+  {n:360,jp:"しらべます",r:"shirabemasu",m:"MEMERIKSA"},{n:361,jp:"かんがえます",r:"kangaemasu",m:"BERFIKIR"},{n:362,jp:"うごきます",r:"ugokimasu",m:"BERGERAK"},{n:363,jp:"おします",r:"oshimasu",m:"MENEKAN/MENDORONG"},{n:364,jp:"ひきます",r:"hikimasu",m:"MENARIK"},
+  {n:365,jp:"つきます",r:"tsukimasu",m:"MENYALA"},{n:366,jp:"きえます",r:"kiemasu",m:"PADAM"},{n:367,jp:"みえます",r:"miemasu",m:"KELIHATAN"},{n:368,jp:"きこえます",r:"kikoemasu",m:"KEDENGARAN"},{n:369,jp:"できます",r:"dekimasu",m:"JADI/BISA"},
+  {n:370,jp:"ちょうせつします",r:"chousetsu shimasu",m:"MENYETEL"},{n:371,jp:"そうさします",r:"sousashimasu",m:"MENGOPERASIKAN"},{n:372,jp:"しょくじします",r:"shokuji shimasu",m:"MAKAN BERSAMA"},
+  {n:373,jp:"きれいな",r:"kireina",m:"CANTIK/BERSIH"},{n:374,jp:"ハンサムな",r:"hansamuna",m:"TAMPAN"},{n:375,jp:"しんせつな",r:"shinsetsuna",m:"BAIK HATI/RAMAH"},{n:376,jp:"げんきな",r:"genkina",m:"SEHAT"},{n:377,jp:"ゆうめいな",r:"yuumeina",m:"TERKENAL"},
+  {n:378,jp:"にぎやかな",r:"nigiyakana",m:"RAMAI"},{n:379,jp:"しずかな",r:"shizukana",m:"SEPI/TENANG"},{n:380,jp:"たのしい",r:"tanoshii",m:"GEMBIRA"},{n:381,jp:"おおきい",r:"ookii",m:"BESAR"},{n:382,jp:"ちいさい",r:"chiisai",m:"KECIL"},
+  {n:383,jp:"あたらしい",r:"atarashii",m:"BARU"},{n:384,jp:"ふるい",r:"furui",m:"LAMA"},{n:385,jp:"いい",r:"ii",m:"BAGUS"},{n:386,jp:"わるい",r:"warui",m:"JELEK"},{n:387,jp:"あつい",r:"atsui",m:"PANAS (SUHU)"},
+  {n:388,jp:"さむい",r:"samui",m:"DINGIN (SUHU)"},{n:389,jp:"あつい",r:"atsui",m:"PANAS (BENDA)"},{n:390,jp:"つめたい",r:"tsumetai",m:"DINGIN (BENDA)"},{n:391,jp:"やさしい",r:"yasashii",m:"MUDAH"},{n:392,jp:"むずかしい",r:"muzukashii",m:"SULIT"},
+  {n:393,jp:"たかい",r:"takai",m:"TINGGI"},{n:394,jp:"ひくい",r:"hikui",m:"RENDAH"},{n:395,jp:"たかい",r:"takai",m:"MAHAL"},{n:396,jp:"やすい",r:"yasui",m:"MURAH"},{n:397,jp:"おもしろい",r:"omoshiroi",m:"MENARIK"},
+  {n:398,jp:"つまらない",r:"tsumaranai",m:"MEMBOSANKAN"},{n:399,jp:"おいしい",r:"oishii",m:"ENAK"},{n:400,jp:"まずい",r:"mazui",m:"TIDAK ENAK"},{n:401,jp:"しろい",r:"shiroi",m:"PUTIH"},{n:402,jp:"くろい",r:"kuroi",m:"HITAM"},
+  {n:403,jp:"あかい",r:"akai",m:"MERAH"},{n:404,jp:"あおい",r:"aoi",m:"BIRU"},{n:405,jp:"すきな",r:"sukina",m:"SUKA"},{n:406,jp:"きらいな",r:"kiraina",m:"BENCI"},{n:407,jp:"じょうずな",r:"jouzuna",m:"PINTAR"},
+  {n:408,jp:"へたな",r:"hetana",m:"BODOH"},{n:409,jp:"ちかい",r:"chikai",m:"DEKAT"},{n:410,jp:"とおい",r:"tooi",m:"JAUH"},{n:411,jp:"はやい",r:"hayai",m:"CEPAT"},{n:412,jp:"おそい",r:"osoi",m:"LAMBAT"},
+  {n:413,jp:"おおい",r:"ooi",m:"BANYAK"},{n:414,jp:"すくない",r:"sukunai",m:"SEDIKIT"},{n:415,jp:"あたたかい",r:"atatakai",m:"HANGAT"},{n:416,jp:"すずしい",r:"suzushii",m:"SEJUK"},{n:417,jp:"ながい",r:"nagai",m:"PANJANG"},
+  {n:418,jp:"みじかい",r:"mijikai",m:"PENDEK"},{n:419,jp:"おもい",r:"omoi",m:"BERAT"},{n:420,jp:"かるい",r:"karui",m:"RINGAN"},{n:421,jp:"あまい",r:"amai",m:"MANIS"},{n:422,jp:"からい",r:"karai",m:"PEDAS"},
+  {n:423,jp:"ひまな",r:"himana",m:"SENGGANG"},{n:424,jp:"いそがしい",r:"isogashii",m:"SIBUK"},{n:425,jp:"わかい",r:"wakai",m:"MUDA"},{n:426,jp:"としうえの",r:"toshiue no",m:"TUA"},{n:427,jp:"たいせつな",r:"taisetsuna",m:"PENTING"},
+  {n:428,jp:"ほしい",r:"hoshii",m:"INGIN"},{n:429,jp:"あかるい",r:"akarui",m:"CERAH"},{n:430,jp:"くらい",r:"kurai",m:"GELAP"},{n:431,jp:"ひろい",r:"hiroi",m:"LUAS"},{n:432,jp:"せまい",r:"semai",m:"SEMPIT"},
+  {n:433,jp:"べんりな",r:"benrina",m:"PRAKTIS"},{n:434,jp:"ふべんな",r:"fubenna",m:"TIDAK PRAKTIS"},{n:435,jp:"かんたんな",r:"kantanna",m:"SEDERHANA"},{n:436,jp:"ふくざつな",r:"fukuzatsuna",m:"RUMIT"},{n:437,jp:"せがたかい",r:"se ga takai",m:"TINGGI BADAN"},
+  {n:438,jp:"せがひくい",r:"se ga hikui",m:"PENDEK BADAN"},{n:439,jp:"あぶない",r:"abunai",m:"BERBAHAYA"},{n:440,jp:"うれしい",r:"ureshii",m:"SENANG"},{n:441,jp:"かなしい",r:"kanashii",m:"SEDIH"},{n:442,jp:"さびしい",r:"sabishii",m:"KESEPIAN"},
+  {n:443,jp:"ねむい",r:"nemui",m:"MENGANTUK"},{n:444,jp:"やくにたちます",r:"yaku ni tachimasu",m:"BERMANFAAT"},{n:445,jp:"きをつけます",r:"ki o tsukemasu",m:"BERHATI-HATI"},{n:446,jp:"もっていきます",r:"motte ikimasu",m:"MEMBAWA PERGI"},
+  {n:447,jp:"もってきます",r:"motte kimasu",m:"MEMBAWA DATANG"},{n:448,jp:"もってかえります",r:"motte kaerimasu",m:"MEMBAWA PULANG"},{n:449,jp:"しょくじします",r:"shokuji shimasu",m:"MAKAN (BERSAMA)"}
+];
+
+let S={idx:0,batch:[],pool:[],cur:null,total:0,correct:0,wrong:0,mistakes:[],mastered:[],answered:false};
+const FIRST=5,ADD=2;
+
+function nm(s){return s.toLowerCase().trim().replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,' ')}
+function hint(w){
+  if(w.n<=27)return`Nama negara/wilayah. Contoh: わたしは ${w.jp} から きました。`;
+  if(w.n<=244)return`Kata benda. Contoh: これは ${w.jp} です。`;
+  if(w.n<=372)return`Kata kerja. Contoh: まいにち ${w.jp}。`;
+  return`Kata sifat. Contoh: この へやは ${w.jp} です。`;
+}
+function show(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on')}
+
+function startGame(){
+  if(S.idx===0){S.batch=V.slice(0,FIRST);S.idx=FIRST;}
+  else{S.batch=[...S.batch,...V.slice(S.idx,S.idx+ADD)];S.idx+=ADD;}
+  S.pool=[...S.batch];S.total=0;S.correct=0;S.wrong=0;S.mistakes=[];S.answered=false;
+  updateProg();updateStats();
+  document.getElementById('stats').classList.add('on');
+  document.getElementById('memLbl').textContent=`Hafal kosakata ini · No.${S.batch[0].n}–${S.batch[S.batch.length-1].n}`;
+  document.getElementById('vcList').innerHTML=S.batch.map(w=>`
+    <div class="vc" style="margin-bottom:8px">
+      <span class="vc-num">#${w.n}</span>
+      <span class="vc-jp">${w.jp}</span>
+      <span class="vc-rom">${w.r}</span>
+      <span class="vc-mean">${w.m}</span>
+    </div>`).join('');
+  show('sMem');
+}
+
+function shuffle(a){return[...a].sort(()=>Math.random()-.5)}
+
+function startQuiz(){
+  S.pool=shuffle(S.batch);
+  nextQ();show('sQuiz');
+}
+
+function nextQ(){
+  S.answered=false;
+  const fb=document.getElementById('fb');fb.className='fb';fb.innerHTML='';
+  const inp=document.getElementById('ansInp');inp.value='';inp.className='';inp.focus();
+  if(!S.pool.length)S.pool=shuffle(S.batch);
+  S.cur=S.pool.pop();
+  document.getElementById('qWord').textContent=S.cur.jp;
+}
+
+function onKey(e){if(e.key==='Enter'&&!S.answered)check()}
+
+function check(){
+  if(S.answered)return;
+  const raw=document.getElementById('ansInp').value.trim();
+  if(!raw)return;
+  S.answered=true;S.total++;
+  const pm=raw.match(/^(.+?)\s*\((.+)\)\s*$/);
+  const uR=pm?nm(pm[1]):nm(raw);
+  const uM=pm?pm[2].toUpperCase().trim():'';
+  const cR=nm(S.cur.r),cM=S.cur.m.toUpperCase();
+  const rOk=uR===cR||uR.replace(/\s/g,'')===cR.replace(/\s/g,'');
+  const mOk=!uM||uM===cM||cM.includes(uM)||uM.includes(cM.split('/')[0]);
+  const ok=rOk&&mOk;
+  const inp=document.getElementById('ansInp');
+  const fb=document.getElementById('fb');
+  if(ok){
+    S.correct++;inp.classList.add('ok');
+    fb.className='fb ok on';
+    if(!S.mastered.find(x=>x.jp===S.cur.jp))S.mastered.push(S.cur);
+    fb.innerHTML=`<div class="fb-ttl ok">✅ BENAR!</div><strong>${S.cur.jp}</strong> = ${S.cur.r} → <strong>${S.cur.m}</strong><br><small style="color:#555">💡 ${hint(S.cur)}</small>`;
+  } else {
+    S.wrong++;inp.classList.add('no');
+    fb.className='fb no on';
+    S.mistakes.push({jp:S.cur.jp,yours:raw,ans:`${S.cur.r} (${S.cur.m})`});
+    fb.innerHTML=`<div class="fb-ttl no">❌ SALAH!</div>Kamu: <strong>${raw}</strong><br>Benar: <strong>${S.cur.r}</strong> → <strong>${S.cur.m}</strong><br><small style="color:#555">💡 ${hint(S.cur)}</small>`;
+  }
+  updateStats();
+}
+
+function next(){nextQ()}
+
+function updateStats(){
+  document.getElementById('sTotal').textContent=S.total;
+  document.getElementById('sCorrect').textContent=S.correct;
+  document.getElementById('sWrong').textContent=S.wrong;
+  document.getElementById('sMastered').textContent=S.mastered.length;
+}
+
+function updateProg(){
+  document.getElementById('pFill').style.width=Math.round(S.idx/V.length*100)+'%';
+}
+
+function endGame(){
+  const pct=S.total?Math.round(S.correct/S.total*100):0;
+  document.getElementById('eScore').textContent=pct+'%';
+  document.getElementById('eLbl').textContent=`${S.correct} benar dari ${S.total} soal`;
+  const mb=document.getElementById('eMistBox'),ml=document.getElementById('eMistList');
+  if(S.mistakes.length){
+    mb.style.display='block';
+    ml.innerHTML=S.mistakes.map(mk=>`
+      <div class="mk-row">
+        <span class="mk-jp">${mk.jp}</span>
+        <div class="mk-info"><div class="mk-yours">Kamu: ${mk.yours}</div><div class="mk-right">Benar: ${mk.ans}</div></div>
+      </div>`).join('');
+  } else mb.style.display='none';
+  document.getElementById('eMastered').innerHTML=S.mastered.map(w=>`<div class="m-chip">${w.jp}</div>`).join('');
+  document.getElementById('stats').classList.remove('on');
+  show('sEnd');
+}
+
+function resetAll(){
+  S={idx:0,batch:[],pool:[],cur:null,total:0,correct:0,wrong:0,mistakes:[],mastered:[],answered:false};
+  document.getElementById('pFill').style.width='0%';
+  document.getElementById('stats').classList.remove('on');
+  show('sStart');
+}
+</script>
+</body>
+</html>
